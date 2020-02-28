@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bookdeer.bookdeer.Dao.BookDao">
+    <select id="queryBook" resultType="com.bookdeer.bookdeer.entity.Book">
+         select a.book_id,a.book_name,a.book_desc,a.book_auth,
+                b.book_file_path,c.book_cover,a.update_by,
+                a.update_time
+        from book_details a,book_file b,book_cover c
+        where a.book_id=b.book_id and a.book_id=c.book_id and a.book_id &lt;=100
+        order by a.book_id desc
+    </select>
+    <select id="queryBookMaxId" resultType="com.bookdeer.bookdeer.entity.Book">
+         select max(book_id) book_id
+         from book_details
+    </select>
+    <select id="queryBookById" parameterType="Integer"
+            resultType="com.bookdeer.bookdeer.entity.Book">
+         select a.*,b.book_file_path
+         from book_details a,book_file b
+         where a.book_id=b.book_id and a.book_id=#{bookId}
+         order by a.book_id desc
+    </select>
+    <insert id="insertBook" useGeneratedKeys="true" keyProperty="bookId"
+                     keyColumn="book_id" parameterType="com.bookdeer.bookdeer.entity.Book">
+         insert into book_details(book_id,book_name,book_auth,book_publish,book_desc,owner,category,create_by,create_time)
+         values
+         (#{bookId},#{bookName},#{bookAuth},#{bookPublish},
+          #{bookDesc},#{owner},#{category},#{createBy},#{createTime})
+    </insert>
+    <insert id="insertBookFile" useGeneratedKeys="true" keyProperty="bookId"
+            keyColumn="book_id" parameterType="com.bookdeer.bookdeer.entity.Book">
+         insert into book_file(book_id,book_file_path)
+         values
+         (#{bookId},#{bookFilePath})
+    </insert>
+    <update id="updateBook" parameterType="com.bookdeer.bookdeer.entity.Book">
+        UPDATE book_details
+        <set>
+            <if test="bookName!=null">area_name=#{bookName}</if>
+            <if test="bookDesc!=null">book_desc=#{bookDesc}</if>
+            <if test="bookAuth!=null">book_desc=#{bookAuth}</if>
+            <if test="bookPublish!=null">book_desc=#{bookPublish}</if>
+            <if test="updateBy!=null">update_by=#{updateBy}</if>
+            <if test="createBy!=null">create_by=#{createBy}</if>
+            <if test="updateTime!=null">update_time=#{updateTime}</if>
+            <if test="createTime!=null">create_time=#{createTime}</if>
+        </set>
+        WHERE book_id=#{bookId}
+    </update>
+    <delete id="deleteBook">
+        delete from book_details
+        where book_id=#{bookId}
+    </delete>
+    <insert id="insertBookCover"  useGeneratedKeys="true"
+            keyColumn="book_id" parameterType="Integer">
+	    insert into book_cover(book_id,book_cover)
+	    values(#{bookId},empty_blob())
+	</insert>
+    <select id="queryBookCoverById" parameterType="Integer" resultType="com.bookdeer.bookdeer.entity.BookCover">
+		select * from book_cover
+		where book_id = #{bookId} for update
+	</select>
+    <select id="queryMineBookList" parameterType="String" resultType="com.bookdeer.bookdeer.entity.Book">
+        select substr(GET_PYJM(a.book_name),0,1) first_word,a.book_id,a.book_name,a.book_desc,b.book_cover,c.book_file_path
+        from book_details a,book_cover b,book_file c
+        where a.book_id=b.book_id and a.book_id=c.book_id
+            and owner= #{owner}
+        order by  first_word,a.book_id
+    </select>
+    <update id="changeCategory" parameterType="String" >
+        update book_details
+        set category='S'
+        where book_id=#{bookId}
+    </update>
+    <delete id="deleteMineBookList" parameterType="String" >
+        delete from  book_details
+        where owner=#{owner} and book_id=#{bookId}
+    </delete>
+    <select id="searchBook" parameterType="String" resultType="com.bookdeer.bookdeer.entity.Book">
+         select a.book_id,a.book_name,a.book_desc,a.book_auth,
+                b.book_file_path,c.book_cover,a.update_by,
+                a.update_time
+        from book_details a,book_file b,book_cover c
+        where a.book_id=b.book_id and a.book_id=c.book_id and a.book_id &lt;=100
+        <if test="searchType=='name'">and book_name like #{searchInput}</if>
+        <if test="searchType=='author'">and book_auth like #{searchInput}</if>
+        order by a.book_id desc
+    </select>
+</mapper>
