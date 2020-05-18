@@ -1,6 +1,7 @@
 package com.bookdeer.bookdeer.web;
 
 import com.bookdeer.bookdeer.entity.Book;
+import com.bookdeer.bookdeer.entity.WeChatUserInfo;
 import com.bookdeer.bookdeer.service.BookService;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -11,6 +12,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -88,7 +92,8 @@ public class BookController {
                         ||"PDF".equals(type.toUpperCase())||"XLS".equals(type.toUpperCase())
                         ||"XLSX".equals(type.toUpperCase())) {
                     // 项目在容器中实际发布运行的根路径
-                    String realPath = request.getSession().getServletContext().getRealPath("/");
+//                    String realPath =request.getSession().getServletContext().getRealPath("/");
+                    String realPath = "/home/bkd_data/";
                     // 自定义的文件名称
                      String trueFileName = String.valueOf(System.currentTimeMillis()) + fileName;
                     // 设置存放图片文件的路径
@@ -212,6 +217,42 @@ public class BookController {
         modelMap.put("bookList",list);
         return modelMap;
     }
-    //endregiom
+    //endregion
 
+    //region
+    @RequestMapping(value="/getOpenId",method=RequestMethod.GET)
+    private String getOpenId(String js_code) throws Exception {
+        String APP_ID = "wx8d7b3920e3b568c3";//输入小程序appid
+        String APP_SECRET = "bf9f52f8ac76fb940416a1fab4a32655";//输入小程序app_secret
+        String reqUrl="https://api.weixin.qq.com/sns/jscode2session";
+        String urlStr=new StringBuilder().append(reqUrl)
+                .append("?appid="+ APP_ID)
+                .append("&secret="+APP_SECRET)
+                .append("&js_code="+js_code)
+                .append("&grant_type=authorization_code")
+                .toString();
+        URL url = new URL(urlStr);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.connect();
+        int code = connection.getResponseCode();
+        if (code == 404) {
+            throw new Exception("认证无效，找不到此次认证的会话信息！");
+        }
+        if (code == 500) {
+            throw new Exception("认证服务器发生内部错误！");
+        }
+        if (code != 200) {
+            throw new Exception("发生其它错误，认证服务器返回 " + code);
+        }
+        InputStream is = connection.getInputStream();
+        byte[] response = new byte[is.available()];
+        is.read(response);
+        is.close();
+        if (response == null || response.length == 0) {
+            throw new Exception("认证无效，找不到此次认证的会话信息！");
+        }
+        String userId = new String(response, "UTF-8");
+        return userId;
+    }
+    //endregion
 }

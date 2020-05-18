@@ -9,7 +9,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.beans.PropertyVetoException;
 @Configuration
 //配置mybatis mapper的扫描路径
-@MapperScan("com.bookdeer.bookdeer.dao")
+@MapperScan("com.bookdeer.bookdeer.Dao")
 public class DataSourceConfiguration {
     @Value("${jdbc.driver}")
     private String jdbcDriver;
@@ -17,7 +17,7 @@ public class DataSourceConfiguration {
     private String jdbcUrl;
     @Value("${jdbc.username}")
     private String jdbcUsername;
-    @Value("${jdbc.password}")
+    @Value("Xuexi2020")
     private String jdbcPassword;
 
     @Bean(name="dataSource")

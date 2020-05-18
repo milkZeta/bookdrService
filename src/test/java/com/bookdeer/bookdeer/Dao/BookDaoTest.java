@@ -2,7 +2,7 @@ package com.bookdeer.bookdeer.Dao;
 
 import com.bookdeer.bookdeer.entity.Book;
 import org.junit.Ignore;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,10 +19,8 @@ public class BookDaoTest {
     @Autowired
     private BookDao bookDao;
     @Test
-    @Ignore
     public void queryBook() {
         List<Book> bookList=bookDao.queryBook();
-        assertEquals(0,bookList.size());
     }
 
     @Test

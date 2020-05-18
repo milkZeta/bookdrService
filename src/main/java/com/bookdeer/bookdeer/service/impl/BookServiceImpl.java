@@ -23,6 +23,7 @@ public class BookServiceImpl implements BookService {
     public BookDao bookDao;
     @Override
     public List<Book> queryBook() {
+        List<Book>  bookList=bookDao.queryBook();
         return bookDao.queryBook();
     }
 
@@ -195,9 +196,9 @@ public class BookServiceImpl implements BookService {
     //返回首字母与Book变量
     public Map<String,List<Book>> queryMineBookList(String owner){
         Map<String,List<Book>> bookMap=new HashMap<>();
-        List<Book> bookList=bookDao.queryMineBookList(owner);
-        List<Book> bookBasket= new ArrayList<>();
         try {
+            List<Book> bookList=bookDao.queryMineBookList(owner);
+            List<Book> bookBasket= new ArrayList<>();
             //将同一个首字母的书放到一个List里面
             for (int i = 0; i < bookList.size(); i++) {
                 if (i != 0 && !bookList.get(i).getFirstWord().equals(bookList.get(i - 1).getFirstWord())) {
@@ -211,7 +212,9 @@ public class BookServiceImpl implements BookService {
                 }
             }
             bookBasket=convertBlobList(bookBasket);
-            bookMap.put(bookList.get(bookList.size() - 1).getFirstWord(), bookBasket);
+            if(bookList.size()!=0){
+                bookMap.put(bookList.get(bookList.size() - 1).getFirstWord(), bookBasket);
+            }
 
         }catch(Exception e){
             throw new RuntimeException("获取个人书籍失败:" + e.toString());
@@ -224,7 +227,7 @@ public class BookServiceImpl implements BookService {
     //修改catogary字段的值
     public boolean changeCategory(String bookId){
         return bookDao.changeCategory(bookId);
-    }
+}
 
     //下载服务器资源要用另存为的方式，之前的方式读取不完全
     public byte[] downloadResource(Integer bookId){
@@ -252,7 +255,7 @@ public class BookServiceImpl implements BookService {
 
     public List<String> readResource(Integer bookId){
         String filePath=bookDao.queryBookById(bookId).getBookFilePath();
-
+        filePath=filePath.replace(' ','/');
         InputStream inputStream = null;
         int pageCount=1500;
         String s_gbk="";

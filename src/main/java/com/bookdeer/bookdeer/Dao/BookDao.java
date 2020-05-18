@@ -2,10 +2,12 @@ package com.bookdeer.bookdeer.Dao;
 
 import com.bookdeer.bookdeer.entity.Book;
 import com.bookdeer.bookdeer.entity.BookCover;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
 
+@Repository
 public interface BookDao {
     /**
      * 列出书籍列表

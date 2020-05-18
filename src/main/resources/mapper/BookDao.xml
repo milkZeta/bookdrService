@@ -8,7 +8,7 @@
                 b.book_file_path,c.book_cover,a.update_by,
                 a.update_time
         from book_details a,book_file b,book_cover c
-        where a.book_id=b.book_id and a.book_id=c.book_id and a.book_id &lt;=100
+        where a.book_id=b.book_id and a.book_id=c.book_id
         order by a.book_id desc
     </select>
     <select id="queryBookMaxId" resultType="com.bookdeer.bookdeer.entity.Book">
@@ -63,10 +63,10 @@
 		where book_id = #{bookId} for update
 	</select>
     <select id="queryMineBookList" parameterType="String" resultType="com.bookdeer.bookdeer.entity.Book">
-        select substr(GET_PYJM(a.book_name),0,1) first_word,a.book_id,a.book_name,a.book_desc,b.book_cover,c.book_file_path
+        select substr(nvl(GET_PYJM(a.book_name),upper(a.book_name)),0,1) first_word,a.book_id,a.book_name,a.book_desc,b.book_cover,c.book_file_path
         from book_details a,book_cover b,book_file c
         where a.book_id=b.book_id and a.book_id=c.book_id
-            and owner= #{owner}
+        and owner=#{owner}
         order by  first_word,a.book_id
     </select>
     <update id="changeCategory" parameterType="String" >
