@@ -3,7 +3,6 @@ package com.bookdeer.bookdeer.service.impl;
 import com.bookdeer.bookdeer.Dao.BookDao;
 import com.bookdeer.bookdeer.entity.Book;
 import com.bookdeer.bookdeer.entity.BookCover;
-import com.bookdeer.bookdeer.entity.BookFileDetails;
 import com.bookdeer.bookdeer.service.BookService;
 import com.mchange.util.Base64Encoder;
 import oracle.sql.BLOB;
@@ -66,12 +65,11 @@ public class BookServiceImpl implements BookService {
     }
 
     @Transactional
-    public boolean insertCover( Book book, String imagePath){
+    public boolean insertCover(MultipartFile image, Book book, String imagePath){
         InputStream fis = null;
         BookCover bookCover;
         OutputStream ops = null;
-        int insertFlag;
-            insertFlag=bookDao.insertBookCover(book.getBookId());
+        int insertFlag=bookDao.insertBookCover(book.getBookId());
         if(insertFlag>0) {
             try {
                 bookCover = bookDao.queryBookCoverById(book.getBookId());
@@ -90,40 +88,6 @@ public class BookServiceImpl implements BookService {
                     ops.flush();
                     ops.close();
                     fis.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return true;
-
-    }
-
-    @Override
-    @Transactional
-    public boolean insertBookDetails(Book book, String bookPath){
-        Reader fr= null;
-        BookFileDetails bookFileDetails;
-        Writer outStream = null;
-        String data;
-        int bookId=bookDao.queryBookMaxId().getBookId()+1;
-        int insertFlag=bookDao.insertBookFileDetails(bookId);
-        if(insertFlag>0) {
-            try {
-                bookFileDetails = bookDao.queryBookFileById(bookId);
-                Clob clob = (Clob)bookFileDetails.getBookFile();
-                fr = new FileReader(bookPath);
-                outStream = clob.setCharacterStream(0);
-                data = FileCopyUtils.copyToString(fr);
-                outStream.write(data);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }finally {
-                try {
-                    outStream.close();
-                    fr.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -219,38 +183,15 @@ public class BookServiceImpl implements BookService {
         }
         return result;
     }
-
-    public String getCLobData(Integer bookId) throws IOException {
-        BookFileDetails bookFileDetails = bookDao.queryBookFileById(bookId);
-        Clob clob = (Clob)bookFileDetails.getBookFile();
-        String detailinfo="";
-        int i = 0;
-        if(clob != null){
-            InputStream input = null;
-            try {
-                input = clob.getAsciiStream();
-                int len = (int)clob.length();
-                byte by[] = new byte[len];
-                while(-1 != (i = input.read(by, 0, by.length))){
-                    input.read(by, 0, i);
-                }
-                detailinfo = new String(by, "utf-8");
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-        }
-        return detailinfo;
-    }
     //读取文件并返回字符串
     @Override
-//    public List<String> fileConvertToBase64Str(Integer bookId){
-//        List<String> result=readResource(bookId);
-////        for(int i=0;i<infoStr.length;i++){
-////            result+=infoStr[i];
-////        }
-//        return result;
-//    }
+    public List<String> fileConvertToBase64Str(Integer bookId){
+        List<String> result=readResource(bookId);
+//        for(int i=0;i<infoStr.length;i++){
+//            result+=infoStr[i];
+//        }
+        return result;
+    }
 
     //返回首字母与Book变量
     public Map<String,List<Book>> queryMineBookList(String owner){

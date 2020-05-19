@@ -54,7 +54,7 @@ public class BookController {
     }
 
     /**
-     * 添加书籍信息()
+     * 添加书籍信息
      *
      * @param bookStr
      * @param request
@@ -63,74 +63,6 @@ public class BookController {
      * @throws JsonMappingException
      * @throws JsonParseException
      */
-    @RequestMapping(value = "/addbook")
-//    private Map<String, Object> addBook(HttpServletRequest request, @RequestParam(value = "file", required = false) MultipartFile file)
-    private  Integer  addBook(HttpServletRequest request, @RequestParam(value = "file", required = false) MultipartFile file)
-            throws JsonParseException, JsonMappingException, IOException {
-//        Map<String, Object> modelMap = new HashMap<String, Object>();
-        String book_name = request.getParameter("book_name");
-        String book_auth = request.getParameter("book_auth");
-        String book_publish = request.getParameter("book_publish");
-        String book_desc = request.getParameter("book_desc");
-        String owner = request.getParameter("owner");
-        boolean flag=false;
-        Integer bookId=-1;
-        Book book=new Book();
-        book.setBookName(book_name);
-        book.setBookAuth(book_auth);
-        book.setBookPublish(book_publish);
-        book.setBookDesc(book_desc);
-        book.setOwner(owner);
-        book.setCreateBy(owner);
-        book.setCategory("P");
-
-        if(!file.isEmpty()) {
-            String fileName = file.getOriginalFilename();
-            String path = null;
-            String type = null;
-            type = fileName.indexOf(".") != -1 ? fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length()) : null;
-            if (type != null) {
-                if ("MOBI".equals(type.toUpperCase())||"TXT".equals(type.toUpperCase())
-                        ||"PDF".equals(type.toUpperCase())||"XLS".equals(type.toUpperCase())
-                        ||"XLSX".equals(type.toUpperCase())) {
-                    String trueFileName = String.valueOf(System.currentTimeMillis()) + fileName;
-                    String realPath = request.getSession().getServletContext().getRealPath("/");
-                    path = realPath + "/" + trueFileName;
-//                    path=path.replace('/',' ');
-                    if (!new File(path).getParentFile().exists()) {
-                        new File(path).getParentFile().mkdirs();
-                    }
-                    try {
-                        file.transferTo(new File(path)); // 保存文件
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    flag = bookService.insertBookDetails(book, path);
-                }
-
-
-                }
-            }
-        // 添加书籍信息
-        if(flag) {
-            bookId = bookService.addBook(book);
-        }
-        else return null;
-        return bookId;
-    }
-
-    //region
-    /**
-     * 添加书籍信息()
-     *
-     * @param bookStr
-     * @param request
-     * @return
-     * @throws IOException
-     * @throws JsonMappingException
-     * @throws JsonParseException
-     */
-    /*因为直接存储到服务器路径下比较慢
     @RequestMapping(value = "/addbook")
 //    private Map<String, Object> addBook(HttpServletRequest request, @RequestParam(value = "file", required = false) MultipartFile file)
     private Integer addBook(HttpServletRequest request, @RequestParam(value = "file", required = false) MultipartFile file)
@@ -163,24 +95,22 @@ public class BookController {
 //                    String realPath =request.getSession().getServletContext().getRealPath("/");
                     String realPath = "/home/bkd_data/";
                     // 自定义的文件名称
-                    String trueFileName = String.valueOf(System.currentTimeMillis()) + fileName;
+                     String trueFileName = String.valueOf(System.currentTimeMillis()) + fileName;
                     // 设置存放图片文件的路径
-                    path = realPath +  trueFileName;
-                    file.transferTo(new File(path));
+                     path = realPath +  trueFileName;
+                     file.transferTo(new File(path));
                     path=path.replace('/',' ');
                 }
                 if(path!=null){
                     book.setBookFilePath(path);
                 }
 
+                }
             }
-        }
         // 添加书籍信息
         Integer bookId= bookService.addBook(book);
         return bookId;
     }
-     */
-    //endregion
 
     @RequestMapping(value = "/insertBookCover")
 //    private Map<String, Object> insertCover(HttpServletRequest request, @RequestParam(value = "file", required = false) MultipartFile file)
@@ -198,7 +128,7 @@ public class BookController {
             Book book = new Book();
             book.setBookId(book_id);
             // 添加书籍信息
-            modelMap.put("success", bookService.insertCover(book, path));
+            modelMap.put("success", bookService.insertCover(image, book, path));
         }
         else{
             modelMap.put("fail", "bookId为空！");
@@ -270,16 +200,9 @@ public class BookController {
     }
 
     @RequestMapping(value = "/readResource", method = RequestMethod.GET)
-    private String readResource(Integer bookId){
+    private List<String> readResource(Integer bookId){
         // 修改书籍信息
-        String str="";
-        try {
-           str=bookService.getCLobData(bookId);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        ;
-        return str;
+        return bookService.fileConvertToBase64Str(bookId);
     }
     //endregion
 
