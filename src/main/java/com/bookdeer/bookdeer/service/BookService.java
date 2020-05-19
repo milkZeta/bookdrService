@@ -4,6 +4,7 @@ import com.bookdeer.bookdeer.entity.Book;
 import com.bookdeer.bookdeer.entity.BookCover;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.sql.Blob;
 import java.util.List;
 import java.util.Map;
@@ -29,11 +30,20 @@ public interface BookService {
      */
     Integer addBook(Book book);
     /**
+     * 插入封面的详细信息
+     * @param book
+     * @return
+     */
+    boolean insertCover( Book book, String imagePath);
+
+    /**
      * 插入书的详细信息
      * @param book
      * @return
      */
-    boolean insertCover(MultipartFile image, Book book, String imagePath);
+    boolean insertBookDetails( Book book, String bookPath);
+
+
 
     /**
      * 更新书的信息
@@ -74,5 +84,5 @@ public interface BookService {
     //endegion
 
     //读取文件并返回字符串
-    List<String> fileConvertToBase64Str(Integer bookId);
+    String getCLobData(Integer bookId) throws IOException;
 }

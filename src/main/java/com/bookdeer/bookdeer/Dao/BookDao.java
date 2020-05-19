@@ -2,6 +2,7 @@ package com.bookdeer.bookdeer.Dao;
 
 import com.bookdeer.bookdeer.entity.Book;
 import com.bookdeer.bookdeer.entity.BookCover;
+import com.bookdeer.bookdeer.entity.BookFileDetails;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -35,11 +36,25 @@ public interface BookDao {
     BookCover queryBookCoverById(Integer bookId);
 
     /**
-     * 获取书籍封面信息
+     * 获取书籍信息
+     * @param bookId
+     * @return
+     */
+    BookFileDetails queryBookFileById(Integer bookId);
+
+    /**
+     * 插入书籍封面信息
      * @param bookId
      * @return
      */
     int  insertBookCover(Integer bookId);
+    /**
+     * 插入书籍信息
+     * @param bookId
+     * @return
+     */
+    int  insertBookFileDetails(Integer bookId);
+
 
     /**
      * 插入书的详细信息

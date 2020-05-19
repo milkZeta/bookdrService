@@ -5,11 +5,12 @@
 <mapper namespace="com.bookdeer.bookdeer.Dao.BookDao">
     <select id="queryBook" resultType="com.bookdeer.bookdeer.entity.Book">
          select a.book_id,a.book_name,a.book_desc,a.book_auth,
-                b.book_file_path,c.book_cover,a.update_by,
+                c.book_cover,a.update_by,
                 a.update_time
-        from book_details a,book_file b,book_cover c
-        where a.book_id=b.book_id and a.book_id=c.book_id
-        order by a.book_id desc
+            from book_details a
+            left join book_file_details b on a.book_id=b.book_id
+            left join book_cover c on  a.book_id=c.book_id
+            order by a.book_id desc
     </select>
     <select id="queryBookMaxId" resultType="com.bookdeer.bookdeer.entity.Book">
          select max(book_id) book_id
@@ -17,8 +18,8 @@
     </select>
     <select id="queryBookById" parameterType="Integer"
             resultType="com.bookdeer.bookdeer.entity.Book">
-         select a.*,b.book_file_path
-         from book_details a,book_file b
+         select a.*
+         from book_details a,book_file_details b
          where a.book_id=b.book_id and a.book_id=#{bookId}
          order by a.book_id desc
     </select>
@@ -29,12 +30,12 @@
          (#{bookId},#{bookName},#{bookAuth},#{bookPublish},
           #{bookDesc},#{owner},#{category},#{createBy},#{createTime})
     </insert>
-    <insert id="insertBookFile" useGeneratedKeys="true" keyProperty="bookId"
-            keyColumn="book_id" parameterType="com.bookdeer.bookdeer.entity.Book">
-         insert into book_file(book_id,book_file_path)
-         values
-         (#{bookId},#{bookFilePath})
-    </insert>
+<!--    <insert id="insertBookFile" useGeneratedKeys="true" keyProperty="bookId"-->
+<!--            keyColumn="book_id" parameterType="com.bookdeer.bookdeer.entity.Book">-->
+<!--         insert into book_file(book_id,book_file_path)-->
+<!--         values-->
+<!--         (#{bookId},#{bookFilePath})-->
+<!--    </insert>-->
     <update id="updateBook" parameterType="com.bookdeer.bookdeer.entity.Book">
         UPDATE book_details
         <set>
@@ -58,14 +59,24 @@
 	    insert into book_cover(book_id,book_cover)
 	    values(#{bookId},empty_blob())
 	</insert>
+    <insert id="insertBookFileDetails"  useGeneratedKeys="true"
+            keyColumn="book_id" parameterType="Integer">
+	    insert into book_file_details(book_id,book_file)
+	    values(#{bookId},empty_clob())
+	</insert>
     <select id="queryBookCoverById" parameterType="Integer" resultType="com.bookdeer.bookdeer.entity.BookCover">
 		select * from book_cover
 		where book_id = #{bookId} for update
 	</select>
+    <select id="queryBookFileById" parameterType="Integer" resultType="com.bookdeer.bookdeer.entity.BookFileDetails">
+		select * from book_file_details
+		where book_id = #{bookId} for update
+	</select>
     <select id="queryMineBookList" parameterType="String" resultType="com.bookdeer.bookdeer.entity.Book">
-        select substr(nvl(GET_PYJM(a.book_name),upper(a.book_name)),0,1) first_word,a.book_id,a.book_name,a.book_desc,b.book_cover,c.book_file_path
-        from book_details a,book_cover b,book_file c
-        where a.book_id=b.book_id and a.book_id=c.book_id
+        select substr(nvl(GET_PYJM(a.book_name),upper(a.book_name)),0,1) first_word,a.book_id,a.book_name,a.book_desc,b.book_cover
+        from book_details a
+        left join book_cover b  on a.book_id=b.book_id
+        left join book_file_details c on a.book_id=c.book_id
         and owner=#{owner}
         order by  first_word,a.book_id
     </select>
@@ -79,11 +90,13 @@
         where owner=#{owner} and book_id=#{bookId}
     </delete>
     <select id="searchBook" parameterType="String" resultType="com.bookdeer.bookdeer.entity.Book">
-         select a.book_id,a.book_name,a.book_desc,a.book_auth,
-                b.book_file_path,c.book_cover,a.update_by,
-                a.update_time
-        from book_details a,book_file b,book_cover c
-        where a.book_id=b.book_id and a.book_id=c.book_id and a.book_id &lt;=100
+        select a.book_id,a.book_name,a.book_desc,a.book_auth,
+        b.book_cover,a.update_by,
+        a.update_time
+        from book_details a
+        left join book_cover b  on a.book_id=b.book_id
+        left join book_file_details c on a.book_id=c.book_id
+        where  a.book_id &lt;=100
         <if test="searchType=='name'">and book_name like #{searchInput}</if>
         <if test="searchType=='author'">and book_auth like #{searchInput}</if>
         order by a.book_id desc
